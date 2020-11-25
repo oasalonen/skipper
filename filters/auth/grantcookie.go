@@ -74,11 +74,25 @@ func getCookie(request *http.Request, config OAuthConfig) (c *cookie, err error)
 	return nil, http.ErrNoCookie
 }
 
-// Drops the grant token cookie from the request
+// Drops the grant token cookie from the request.
 func dropCookie(request *http.Request, config OAuthConfig) {
 	cookies := request.Header.Get("Cookie")
 	cookies = config.TokenCookieRegexp.ReplaceAllString(cookies, "")
 	request.Header.Set("Cookie", cookies)
+}
+
+// createDeleteCookie creates a cookie, which instructs the client to clear the grant
+// token cookie when used with a Set-Cookie header.
+func createDeleteCookie(config OAuthConfig, host string) *http.Cookie {
+	return &http.Cookie{
+		Name:     config.TokenCookieName,
+		Value:    "",
+		Path:     "/",
+		Domain:   extractDomainFromHost(host),
+		MaxAge:   -1,
+		Secure:   true,
+		HttpOnly: true,
+	}
 }
 
 func CreateCookie(config OAuthConfig, host string, t *oauth2.Token) (*http.Cookie, error) {

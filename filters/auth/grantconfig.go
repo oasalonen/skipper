@@ -38,6 +38,10 @@ type OAuthConfig struct {
 	// access token.
 	TokenURL string
 
+	// RevokeTokenURL, the url where the access and revoke tokens can be
+	// revoked during a logout.
+	RevokeTokenURL string
+
 	// CallbackPath contains the path where the callback requests with the
 	// authorization code should be redirected to.
 	CallbackPath string
@@ -223,6 +227,14 @@ func (c *OAuthConfig) NewGrantClaimsQuery() (filters.Spec, error) {
 			typ: checkOIDCQueryClaims,
 		},
 	}, nil
+}
+
+func (c *OAuthConfig) NewGrantLogout() (filters.Spec, error) {
+	if err := c.init(); err != nil {
+		return nil, err
+	}
+
+	return &grantLogoutSpec{config: *c}, nil
 }
 
 func (c *OAuthConfig) NewGrantPreprocessor() (routing.PreProcessor, error) {

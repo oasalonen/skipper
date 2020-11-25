@@ -328,12 +328,16 @@ with the following arguments:
 skipper -enable-oauth2-grant-flow \
     -oauth2-auth-url=<OAUTH2_AUTHORIZE_ENDPOINT> \
     -oauth2-token-url=<OAUTH2_TOKEN_ENDPOINT> \
+    -oauth2-revoke-token-url=<OAUTH2_REVOKE_TOKEN_ENDPOINT> \
     -oauth2-tokeninfo-url=<OAUTH2_TOKENINFO_ENDPOINT> \
     -oauth2-callback-path=/oauth/callback
 ```
 
 The `-oauth2-callback-path` must match the path of the route configured with the
 `grantCallback()` filter (refer to the next section).
+
+The `-oauth2-revoke-token-url` is optional, and must only be supplied if you plan
+on using the [grantLogout](../reference/filters.md#grantLogout) filter.
 
 You can configure the `oauthGrant()` filter further for your needs. See the
 [oauthGrant](../reference/filters.md#oauthGrant) filter reference for more details.
@@ -342,7 +346,8 @@ You can configure the `oauthGrant()` filter further for your needs. See the
 
 You can protect any number of routes with the `oauthGrant()` filter. Unauthenticated users
 will be refused access and redirected to log in. You also need one `grantCallback()` filter
-which receives the authorization code:
+which receives the authorization code. You can optionally add a `grantLogout()` filter for 
+revoking access and refresh tokens:
 
 ```
 foo:
@@ -358,6 +363,11 @@ bar:
 callback:
     Path("/oauth/callback")
     -> grantCallback()
+    -> <shunt>;
+
+logout:
+    Path("/logout)
+    -> grantLogout()
     -> <shunt>;
 ```
 
